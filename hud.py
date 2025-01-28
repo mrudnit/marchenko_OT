@@ -4,8 +4,8 @@ from settings import WIDTH
 
 
 class HUD:
-    def __init__(self, screen):
-        self.screen = screen
+    def __init__(self, display):
+        self.display = display
         play_img = pygame.image.load('assets/play.png').convert_alpha()
         menu_img = pygame.image.load('assets/menu.png').convert_alpha()
         back_img = pygame.image.load('assets/back.png').convert_alpha()
@@ -15,9 +15,9 @@ class HUD:
         self.back_button = button.Button(20, 20, back_img, 0.5)
 
         self.ship_buttons = [
-            pygame.Rect(150, 400, 100, 50),  # Кнопка для Ship 1
-            pygame.Rect(300, 400, 100, 50),  # Кнопка для Ship 2
-            pygame.Rect(450, 400, 100, 50),  # Кнопка для Ship 3
+            pygame.Rect(150, 400, 100, 50),
+            pygame.Rect(300, 400, 100, 50),
+            pygame.Rect(450, 400, 100, 50),
         ]
 
         # Список спрайтов кораблей
@@ -29,14 +29,13 @@ class HUD:
 
     def draw(self):
         """Главное меню."""
-        if self.play_button.draw(self.screen):
+        if self.play_button.draw(self.display):
             return "play"
-        if self.menu_button.draw(self.screen):
+        if self.menu_button.draw(self.display):
             return "menu"
         return None
 
     def draw_menu(self):
-        """Меню с информацией."""
         font = pygame.font.SysFont(None, 30)
         text = [
             "Game Info:",
@@ -50,9 +49,9 @@ class HUD:
         ]
         for i, line in enumerate(text):
             text_surface = font.render(line, True, (255, 255, 255))
-            self.screen.blit(text_surface, (50, 100 + i * 30))
+            self.display.blit(text_surface, (50, 100 + i * 30))
 
-        if self.back_button.draw(self.screen):
+        if self.back_button.draw(self.display):
             return "back"
         return None
 
@@ -60,7 +59,7 @@ class HUD:
         font = pygame.font.SysFont(None, 40)
         title_surface = font.render("Select Your Ship", True, (255, 255, 255))
         title_rect = title_surface.get_rect(center=(WIDTH // 2, 150))
-        self.screen.blit(title_surface, title_rect)
+        self.display.blit(title_surface, title_rect)
 
         ship_imgs = [pygame.image.load(ship).convert_alpha() for ship in self.ships]
 
@@ -76,9 +75,9 @@ class HUD:
             x_pos = start_x + (button_width + padding) * i
             rect.x = x_pos  # Обновляем позицию кнопки
 
-            pygame.draw.rect(self.screen, (255, 255, 255), rect, 2)  # Рамка кнопки
+            pygame.draw.rect(self.display, (255, 255, 255), rect, 2)  # Рамка кнопки
             # Отображаем картинку корабля, учитывая центрирование
-            self.screen.blit(ship_imgs[i], (rect.x + (rect.width - ship_imgs[i].get_width()) ,
+            self.display.blit(ship_imgs[i], (rect.x + (rect.width - ship_imgs[i].get_width()) ,
                                             rect.y + (rect.height - ship_imgs[i].get_height())))
 
         mouse_pos = pygame.mouse.get_pos()
@@ -87,7 +86,7 @@ class HUD:
             if rect.collidepoint(mouse_pos) and mouse_click[0]:
                 return i + 1
 
-        if self.back_button.draw(self.screen):
+        if self.back_button.draw(self.display):
             return "back"
 
         return None

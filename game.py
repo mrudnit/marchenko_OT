@@ -1,32 +1,30 @@
 import random
-
 import pygame
 
 from character import Character
 from enemies import Enemies
 from background import Background
+from explosion import Explosion
 
 
 class Game:
-    def __init__(self, screen):
-        self.screen = screen
-        self.player = None
+    def __init__(self, display):
+        self.display = display
+        self.character = None
         self.clock = pygame.time.Clock()
         self.FPS = 60
-        self.obstacles = []  # Список препятствий (враги + метеориты)
         self.spawn_timer = 0
+        self.obstacles = pygame.sprite.Group()
         self.bg_group = pygame.sprite.Group()
         self.bg_group.add(Background())
 
     def set_ship(self, ship_id):
-        """Установка корабля игрока на основе выбора."""
         ship_sprites = [
             "assets/ship_green.png",
             "assets/ship_orange.png",
             "assets/ship_red.png"
         ]
-        # Устанавливаем игрока на выбранный корабль
-        self.player = Character(400, 540, 50, 50, 100, ship_sprites[ship_id - 1])
+        self.character = Character(400, 540, 50, 50, 100, ship_sprites[ship_id - 1])
 
     def spawn_obstacle(self):
         enemy_sprites = [
@@ -36,7 +34,7 @@ class Game:
         ]
         meteor_sprites = [
             "assets/meteor_big.png",
-            "assets/meteor_medium.png",
+            "assets/meteor_middle.png",
             "assets/meteor_small.png"
         ]
 
@@ -49,20 +47,20 @@ class Game:
 
         x = random.randint(0, 750)
         y = random.randint(-200, -50)
-        self.obstacles.append(Enemies(x, y, 50, 50, sprite, speed))
+        self.obstacles.add(Enemies(x, y, 50, 50, sprite, speed))
 
     def run(self):
         self.bg_group.update()
-        self.bg_group.draw(self.screen)
+        self.bg_group.draw(self.display)
 
         # Обновление и отрисовка игрока
         keys = pygame.key.get_pressed()
-        if self.player:
-            self.player.move(keys)
-            if keys[pygame.K_SPACE]:  # Стрельба
-                self.player.shoot()
-            self.player.update_lasers()
-            self.player.draw(self.screen)
+        if self.character:
+            self.character.move(keys)
+            if keys[pygame.K_SPACE]:
+                self.character.shoot()
+            self.character.update_lasers()
+            self.character.draw(self.display)
 
         # Спавн препятствий каждые 2 секунды
         self.spawn_timer += 1
@@ -70,9 +68,15 @@ class Game:
             self.spawn_obstacle()
             self.spawn_timer = 0
 
-        # Обновление и отрисовка препятствий
-        for obstacle in self.obstacles:
-            obstacle.update()
-            obstacle.draw(self.screen)
+        self.obstacles.update()
+        self.obstacles.draw(self.display)
+
+        collision_group = pygame.sprite.groupcollide(self.character.lasers, self.obstacles, True, False)
+        for laser, enemy_list in collision_group.items():
+            for enemy in enemy_list:
+                if enemy.dead() is True:
+                    explosion = Explosion(enemy.width, enemy.height, enemy.x, enemy.y, "assets/boom.png")
+                    explosion.update()
+                    explosion.draw(self.display)
 
         self.clock.tick(self.FPS)

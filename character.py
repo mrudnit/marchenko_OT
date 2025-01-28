@@ -1,7 +1,10 @@
 import pygame
 
+from laser import Laser
+
+
 class Character:
-    def __init__(self, x, y, width, height, health, sprite_path):
+    def __init__(self, x, y, width, height, health, sprite_ship):
         self.x = x
         self.y = y
         self.width = width
@@ -9,58 +12,46 @@ class Character:
         self.health = health
         self.max_health = health
 
-        # Загрузка спрайта
-        self.sprite = pygame.image.load(sprite_path).convert_alpha()
-        self.sprite = pygame.transform.scale(self.sprite, (self.width, self.height))
-
-        # Скорость персонажа
+        self.sprite = pygame.image.load(sprite_ship)
         self.speed = 5
-
-        # Лазеры
-        self.lasers = []  # Теперь это будут лазеры
-        self.last_shot = pygame.time.get_ticks()  # Для задержки между выстрелами
-        self.shoot_delay = 300  # Задержка в миллисекундах
+        self.lasers = pygame.sprite.Group()
+        self.sound = pygame.mixer.Sound(pygame.mixer.Sound('assets/laser.mp3'))
+        self.sound.set_volume(0.5)
+        self.last_shot = pygame.time.get_ticks()
+        self.shoot_delay = 300
 
     def move(self, keys):
-        """Управление движением персонажа."""
         if keys[pygame.K_LEFT] and self.x > 0:
             self.x -= self.speed
-        if keys[pygame.K_RIGHT] and self.x + self.width < 800:  # Ограничение по ширине экрана
+        if keys[pygame.K_RIGHT] and self.x + self.width < 800:
             self.x += self.speed
         if keys[pygame.K_UP] and self.y > 0:
             self.y -= self.speed
-        if keys[pygame.K_DOWN] and self.y + self.height < 600:  # Ограничение по высоте экрана
+        if keys[pygame.K_DOWN] and self.y + self.height < 600:
             self.y += self.speed
 
     def shoot(self):
-        """Стрельба лазерами."""
         now = pygame.time.get_ticks()
-        if now - self.last_shot > self.shoot_delay:  # Проверяем задержку между выстрелами
-            laser = pygame.Rect(self.x + self.width // 2 - 5, self.y, 10, 30)  # Длинный лазер
-            self.lasers.append(laser)
+        if now - self.last_shot > self.shoot_delay:
+            laser = Laser(self.x + self.width // 2 - 5, self.y)
+            self.sound.play()
+            self.lasers.add(laser)
             self.last_shot = now
 
-    def draw(self, screen):
-        """Рисуем персонажа, его здоровье и лазеры."""
-        # Рисуем спрайт
-        screen.blit(self.sprite, (self.x, self.y))
-
-        # Рисуем лазеры
-        for laser in self.lasers:
-            pygame.draw.rect(screen, (0, 255, 0), laser)  # Зеленые лазеры
-
-        # Рисуем здоровье
-        self.draw_health_bar(screen)
+    def draw(self, display):
+        display.blit(self.sprite, (self.x, self.y))
+        self.lasers.draw(display)
+        self.draw_health_bar(display)
 
     def update_lasers(self):
-        """Обновляем положение лазеров и удаляем их, если они выходят за экран."""
-        for laser in self.lasers[:]:
-            laser.y -= 10  # Скорость лазера
-            if laser.bottom < 0:
-                self.lasers.remove(laser)
+        self.lasers.update()
 
-    def draw_health_bar(self, screen):
-        """Рисуем health bar."""
-        pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y - 10, self.width, 5))  # Красная полоска
+    def draw_health_bar(self, display):
+        health_width = self.width
+        health_height = 5
+        health_x = self.x
+        health_y = self.y
+
+        pygame.draw.rect(display, (255, 0, 0), (health_x, health_y - 10, health_width, health_height))  # Красная полоска
         health_width = int(self.width * (self.health / self.max_health))
-        pygame.draw.rect(screen, (0, 255, 0), (self.x, self.y - 10, health_width, 5))  # Зеленая полоска
+        pygame.draw.rect(display, (0, 255, 0), (health_x, health_y - 10, health_width, health_height))  # Зеленая полоска
