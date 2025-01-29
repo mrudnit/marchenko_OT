@@ -12,34 +12,36 @@ class Character:
         self.health = health
         self.max_health = health
 
-        self.sprite = pygame.image.load(sprite_ship)
         self.speed = 5
         self.lasers = pygame.sprite.Group()
+        self.image = pygame.image.load(sprite_ship)
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
         self.sound = pygame.mixer.Sound(pygame.mixer.Sound('assets/laser.mp3'))
         self.sound.set_volume(0.5)
         self.last_shot = pygame.time.get_ticks()
         self.shoot_delay = 300
 
     def move(self, keys):
-        if keys[pygame.K_LEFT] and self.x > 0:
-            self.x -= self.speed
-        if keys[pygame.K_RIGHT] and self.x + self.width < 800:
-            self.x += self.speed
-        if keys[pygame.K_UP] and self.y > 0:
-            self.y -= self.speed
-        if keys[pygame.K_DOWN] and self.y + self.height < 600:
-            self.y += self.speed
+        if keys[pygame.K_LEFT] and self.rect.left > 0:
+            self.rect.x -= self.speed
+        if keys[pygame.K_RIGHT] and self.rect.right < 800:
+            self.rect.x += self.speed
+        if keys[pygame.K_UP] and self.rect.top > 0:
+            self.rect.y -= self.speed
+        if keys[pygame.K_DOWN] and self.rect.bottom < 600:
+            self.rect.y += self.speed
 
     def shoot(self):
         now = pygame.time.get_ticks()
         if now - self.last_shot > self.shoot_delay:
-            laser = Laser(self.x + self.width // 2 - 5, self.y)
+            laser = Laser(self.rect.x + self.rect.width // 2 , self.rect.y)
             self.sound.play()
             self.lasers.add(laser)
             self.last_shot = now
 
     def draw(self, display):
-        display.blit(self.sprite, (self.x, self.y))
+        display.blit(self.image, self.rect.topleft)
         self.lasers.draw(display)
         self.draw_health_bar(display)
 
@@ -47,11 +49,10 @@ class Character:
         self.lasers.update()
 
     def draw_health_bar(self, display):
-        health_width = self.width
         health_height = 5
-        health_x = self.x
-        health_y = self.y
+        health_x = self.rect.x
+        health_y = self.rect.y - 10
 
+        health_width = int(self.rect.width * (self.health / self.max_health))
         pygame.draw.rect(display, (255, 0, 0), (health_x, health_y - 10, health_width, health_height))  # Красная полоска
-        health_width = int(self.width * (self.health / self.max_health))
         pygame.draw.rect(display, (0, 255, 0), (health_x, health_y - 10, health_width, health_height))  # Зеленая полоска
