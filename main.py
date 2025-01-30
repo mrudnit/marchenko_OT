@@ -6,6 +6,8 @@ from hud import HUD
 from settings import *
 
 pygame.init()
+pygame.mixer.init()
+pygame.font.init()
 #window
 display = pygame.display.set_mode(SIZE)
 pygame.display.set_caption(WINDOW_TITLE)
@@ -15,8 +17,8 @@ pygame.mixer.music.set_volume(M_VOLUME)
 pygame.mixer.music.play(-1)
 #classes
 hud = HUD(display)
-game = Game(display)
 background = Background()
+game = Game(display, hud)
 #groups
 bg_group = pygame.sprite.Group()
 bg_group.add(background)
@@ -61,5 +63,6 @@ while run:
         game.run()
 
     pygame.display.update()
+    hud.update()
 
 pygame.quit()

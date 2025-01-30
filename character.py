@@ -3,8 +3,9 @@ import pygame
 from laser import Laser
 
 
-class Character:
-    def __init__(self, x, y, width, height, health, sprite_ship):
+class Character(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height, health, ship_id):
+        super().__init__()
         self.x = x
         self.y = y
         self.width = width
@@ -13,8 +14,14 @@ class Character:
         self.max_health = health
 
         self.speed = 5
+        self.is_alive = True
         self.lasers = pygame.sprite.Group()
-        self.image = pygame.image.load(sprite_ship)
+        ship_sprites = [
+            "assets/ship_green.png",
+            "assets/ship_orange.png",
+            "assets/ship_red.png"
+        ]
+        self.image = pygame.image.load(ship_sprites[ship_id - 1])
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.sound = pygame.mixer.Sound(pygame.mixer.Sound('assets/laser.mp3'))
@@ -56,3 +63,10 @@ class Character:
         health_width = int(self.rect.width * (self.health / self.max_health))
         pygame.draw.rect(display, (255, 0, 0), (health_x, health_y - 10, health_width, health_height))  # Красная полоска
         pygame.draw.rect(display, (0, 255, 0), (health_x, health_y - 10, health_width, health_height))  # Зеленая полоска
+
+    def get_hit(self):
+        self.health -= 1
+        if self.health <= 0:
+            self.health = 0
+            self.is_alive = False
+            self.kill()

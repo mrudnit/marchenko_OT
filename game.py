@@ -15,16 +15,12 @@ class Game:
         self.FPS = 60
         self.spawn_timer = 0
         self.obstacles = pygame.sprite.Group()
+        self.explosions = pygame.sprite.Group()
         self.bg_group = pygame.sprite.Group()
         self.bg_group.add(Background())
 
     def set_ship(self, ship_id):
-        ship_sprites = [
-            "assets/ship_green.png",
-            "assets/ship_orange.png",
-            "assets/ship_red.png"
-        ]
-        self.character = Character(400, 540, 50, 50, 100, ship_sprites[ship_id - 1])
+        self.character = Character(400, 540, 50, 50, 100, ship_id)
 
     def spawn_obstacle(self):
         enemy_sprites = [
@@ -74,9 +70,16 @@ class Game:
         collision_group = pygame.sprite.groupcollide(self.character.lasers, self.obstacles, True, False)
         for laser, enemy_list in collision_group.items():
             for enemy in enemy_list:
-                if enemy.dead() is True:
-                    explosion = Explosion(enemy.width, enemy.height, enemy.x, enemy.y, "assets/boom.png")
-                    explosion.update()
-                    explosion.draw(self.display)
+                if enemy.get_laser():
+                    explosion = Explosion(enemy.rect.width, enemy.rect.height, enemy.rect.x, enemy.rect.y,"assets/boom.png")
+                    self.explosions.add(explosion)  # Добавляем взрыв в группу
+                    enemy.dead()
+
+        if pygame.sprite.spritecollide(self.character, self.obstacles, False):
+            print("Player hit!")
+            self.character.get_hit()
+
+        self.explosions.update()  # Обновляем все взрывы
+        self.explosions.draw(self.display)
 
         self.clock.tick(self.FPS)

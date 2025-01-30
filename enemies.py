@@ -1,9 +1,6 @@
 import pygame
 import random
 
-from explosion import Explosion
-
-
 class Enemies(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, sprite_path, speed):
         super(Enemies, self).__init__()
@@ -12,9 +9,11 @@ class Enemies(pygame.sprite.Sprite):
         self.width = width
         self.height = height
         self.image = pygame.image.load(sprite_path).convert_alpha()
-        self.sound = pygame.mixer.Sound(pygame.mixer.Sound('assets/hit.mp3'))
+        self.sound_h = pygame.mixer.Sound(pygame.mixer.Sound('assets/hit.mp3'))
+        self.sound_e = pygame.mixer.Sound(pygame.mixer.Sound('assets/explosion.mp3'))
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
+        self.destroyed = False
         self.speed = speed
         self.hp = 3
 
@@ -28,13 +27,14 @@ class Enemies(pygame.sprite.Sprite):
         display.blit(self.image, self.rect.topleft)
 
     def get_laser(self):
-        self.sound.play()
-        self.hp -= 1
+        if not self.destroyed:
+            self.sound_h.play()
+            self.hp -= 1
         if self.hp <= 0:
-            self.dead()
+            self.destroyed = True
+            self.sound_e.play()
+            return True
+        return False
 
     def dead(self):
         self.kill()
-        explosion = Explosion(self.width, self.height, self.x, self.y, "assets/boom.png")
-        explosion.update()
-        explosion.draw(self.display)

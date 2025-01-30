@@ -28,7 +28,6 @@ class HUD:
         ]
 
     def draw(self):
-        """Главное меню."""
         if self.play_button.draw(self.display):
             return "play"
         if self.menu_button.draw(self.display):
@@ -63,20 +62,16 @@ class HUD:
 
         ship_imgs = [pygame.image.load(ship).convert_alpha() for ship in self.ships]
 
-        # Расчет выравнивания кнопок и картинок
-        button_width = self.ship_buttons[0].width  # Ширина одной кнопки
-        padding = 50  # Расстояние между кнопками
-        total_width = (button_width * 3) + (padding * 2)  # Общая ширина всех кнопок с промежутками
-        start_x = (WIDTH - total_width) // 2  # Начальная позиция X для выравнивания по центру экрана
+        button_width = self.ship_buttons[0].width
+        padding = 50
+        total_width = (button_width * 3) + (padding * 2)
+        start_x = (WIDTH - total_width) // 2
 
-        # Отображаем кнопки и картинки
         for i, rect in enumerate(self.ship_buttons):
-            # Вычисляем позицию каждой кнопки по горизонтали
             x_pos = start_x + (button_width + padding) * i
-            rect.x = x_pos  # Обновляем позицию кнопки
+            rect.x = x_pos
 
-            pygame.draw.rect(self.display, (255, 255, 255), rect, 2)  # Рамка кнопки
-            # Отображаем картинку корабля, учитывая центрирование
+            pygame.draw.rect(self.display, (255, 255, 255), rect, 2)
             self.display.blit(ship_imgs[i], (rect.x + (rect.width - ship_imgs[i].get_width()) ,
                                             rect.y + (rect.height - ship_imgs[i].get_height())))
 
@@ -90,4 +85,3 @@ class HUD:
             return "back"
 
         return None
-
