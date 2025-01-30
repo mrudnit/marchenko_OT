@@ -14,6 +14,12 @@ class Character(pygame.sprite.Sprite):
         self.max_health = health
 
         self.speed = 5
+        self.power_shoot = 1
+        self.last_hit_time = 0
+        self.invulnerability_delay = 500
+        self.invulnerability = 0
+        self.last_shot = pygame.time.get_ticks()
+        self.shoot_delay = 300
         self.is_alive = True
         self.lasers = pygame.sprite.Group()
         ship_sprites = [
@@ -26,8 +32,6 @@ class Character(pygame.sprite.Sprite):
         self.rect.topleft = (x, y)
         self.sound = pygame.mixer.Sound(pygame.mixer.Sound('assets/laser.mp3'))
         self.sound.set_volume(0.5)
-        self.last_shot = pygame.time.get_ticks()
-        self.shoot_delay = 300
 
     def move(self, keys):
         if keys[pygame.K_LEFT] and self.rect.left > 0:
@@ -65,8 +69,12 @@ class Character(pygame.sprite.Sprite):
         pygame.draw.rect(display, (0, 255, 0), (health_x, health_y - 10, health_width, health_height))  # Зеленая полоска
 
     def get_hit(self):
-        self.health -= 1
-        if self.health <= 0:
-            self.health = 0
-            self.is_alive = False
-            self.kill()
+        now = pygame.time.get_ticks()  # Текущее время
+        if now - self.last_hit_time > self.invulnerability_delay:
+            self.health -= 1
+            self.last_hit_time = now
+            print(f"Health: {self.health}")
+            if self.health <= 0:
+                self.health = 0
+                self.is_alive = False
+                self.kill()

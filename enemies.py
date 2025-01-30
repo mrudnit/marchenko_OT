@@ -1,6 +1,9 @@
 import pygame
 import random
 
+import character
+
+
 class Enemies(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, sprite_path, speed):
         super(Enemies, self).__init__()
@@ -29,7 +32,7 @@ class Enemies(pygame.sprite.Sprite):
     def get_laser(self):
         if not self.destroyed:
             self.sound_h.play()
-            self.hp -= 1
+            self.hp -= -1
         if self.hp <= 0:
             self.destroyed = True
             self.sound_e.play()
