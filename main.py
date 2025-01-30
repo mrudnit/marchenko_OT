@@ -3,6 +3,7 @@ import pygame
 from background import Background
 from game import Game
 from hud import HUD
+from score import Score
 from settings import *
 
 pygame.init()
@@ -18,8 +19,9 @@ pygame.mixer.music.play(-1)
 #classes
 hud = HUD(display)
 background = Background()
-game = Game(display, hud)
-#groups
+score = Score()
+game = Game(display, score)
+#groupsf
 bg_group = pygame.sprite.Group()
 bg_group.add(background)
 
@@ -61,8 +63,9 @@ while run:
     #process
     elif game_state == STATE_GAME:
         game.run()
+        score.update()
+        display.blit(score.image, score.rect)
 
     pygame.display.update()
-    hud.update()
 
 pygame.quit()

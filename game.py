@@ -8,12 +8,13 @@ from explosion import Explosion
 
 
 class Game:
-    def __init__(self, display):
+    def __init__(self, display, score):
         self.display = display
         self.character = None
         self.clock = pygame.time.Clock()
         self.FPS = 60
         self.spawn_timer = 0
+        self.score = score
         self.obstacles = pygame.sprite.Group()
         self.explosions = pygame.sprite.Group()
         self.bg_group = pygame.sprite.Group()
@@ -72,14 +73,15 @@ class Game:
             for enemy in enemy_list:
                 if enemy.get_laser():
                     explosion = Explosion(enemy.rect.width, enemy.rect.height, enemy.rect.x, enemy.rect.y,"assets/boom.png")
-                    self.explosions.add(explosion)  # Добавляем взрыв в группу
+                    self.explosions.add(explosion)
                     enemy.dead()
+                    self.score.update_score(25)
 
         if pygame.sprite.spritecollide(self.character, self.obstacles, False):
             print("Player hit!")
             self.character.get_hit()
 
-        self.explosions.update()  # Обновляем все взрывы
+        self.explosions.update()
         self.explosions.draw(self.display)
 
         self.clock.tick(self.FPS)
