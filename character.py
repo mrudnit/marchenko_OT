@@ -44,12 +44,13 @@ class Character(pygame.sprite.Sprite):
             self.rect.y += self.speed
 
     def shoot(self):
-        now = pygame.time.get_ticks()
-        if now - self.last_shot > self.shoot_delay:
-            laser = Laser(self.rect.x + self.rect.width // 2 , self.rect.y)
-            self.sound.play()
-            self.lasers.add(laser)
-            self.last_shot = now
+        if self.is_alive:
+            now = pygame.time.get_ticks()
+            if now - self.last_shot > self.shoot_delay:
+                laser = Laser(self.rect.x + self.rect.width // 2 , self.rect.y)
+                self.sound.play()
+                self.lasers.add(laser)
+                self.last_shot = now
 
     def draw(self, display):
         display.blit(self.image, self.rect.topleft)
@@ -73,8 +74,8 @@ class Character(pygame.sprite.Sprite):
         if now - self.last_hit_time > self.invulnerability_delay:
             self.health -= 1
             self.last_hit_time = now
-            print(f"Health: {self.health}")
             if self.health <= 0:
                 self.health = 0
                 self.is_alive = False
+                self.image = pygame.Surface((0, 0))
                 self.kill()

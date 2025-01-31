@@ -2,10 +2,12 @@ import random
 import pygame
 
 from character import Character
-from enemies import Enemies
+from enemy import Enemy
 from background import Background
 from explosion import Explosion
 from boosts import Boost
+from gameover import GameOver
+
 
 class Game:
     def __init__(self, display, score):
@@ -15,16 +17,18 @@ class Game:
         self.FPS = 60
         self.spawn_timer = 0
         self.score = score
-        self.obstacles = pygame.sprite.Group()
+        self.enemies = pygame.sprite.Group()
         self.explosions = pygame.sprite.Group()
         self.boosts = pygame.sprite.Group()
+        self.over_group = pygame.sprite.Group()
         self.bg_group = pygame.sprite.Group()
         self.bg_group.add(Background())
+        self.game_over = False
 
     def set_ship(self, ship_id):
         self.character = Character(400, 500, 50, 50, 10, ship_id)
 
-    def spawn_obstacle(self):
+    def spawn_enemies(self):
         enemy_sprites = [
             "assets/enemy1.png",
             "assets/enemy2.png",
@@ -45,7 +49,7 @@ class Game:
 
         x = random.randint(0, 750)
         y = random.randint(-200, -50)
-        self.obstacles.add(Enemies(x, y, 50, 50, sprite, speed))
+        self.enemies.add(Enemy(x, y, 50, 50, sprite, speed))
 
     def spawn_boost(self):
         boost_sprites = {
@@ -73,21 +77,23 @@ class Game:
             self.character.draw(self.display)
 
         # spawn obstacles
-        self.spawn_timer += 1
-        if self.spawn_timer > self.FPS * 2:
-            self.spawn_obstacle()
-            self.spawn_timer = 0
+        if not self.game_over :
+            self.spawn_timer += 1
+            if self.spawn_timer > self.FPS * 2:
+                self.spawn_enemies()
+                self.spawn_timer = 0
 
-        self.obstacles.update()
-        self.obstacles.draw(self.display)
+        self.enemies.update()
+        self.enemies.draw(self.display)
 
         #spawn boosts
-        if self.spawn_timer %(self.FPS * 10) == 0:
-            self.spawn_boost()
+        if not self.game_over:
+            if self.spawn_timer %(self.FPS * 10) == 0:
+                self.spawn_boost()
         self.boosts.update()
         self.boosts.draw(self.display)
         #collisions
-        collision_group = pygame.sprite.groupcollide(self.character.lasers, self.obstacles, True, False)
+        collision_group = pygame.sprite.groupcollide(self.character.lasers, self.enemies, True, False)
         for laser, enemy_list in collision_group.items():
             for enemy in enemy_list:
                 if enemy.get_laser():
@@ -96,7 +102,7 @@ class Game:
                     enemy.dead()
                     self.score.update_score(25)
 
-        collision_group2 = pygame.sprite.spritecollideany(self.character, self.obstacles)  # возвращает лишь один спрайт с которым произошло столкновения
+        collision_group2 = pygame.sprite.spritecollideany(self.character, self.enemies)  # возвращает лишь один спрайт с которым произошло столкновения
         if collision_group2:
             self.character.get_hit()
 
@@ -104,7 +110,27 @@ class Game:
         if boost_collision:
             boost_collision.apply_boost(self.character)
 
+        self.check_game_over()
+
         self.explosions.update()
         self.explosions.draw(self.display)
 
         self.clock.tick(self.FPS)
+
+    #game over
+    def check_game_over(self):
+        if self.character and not self.character.is_alive and not self.game_over:
+            self.end_game()
+
+        if self.game_over:
+            self.over_group.draw(self.display)
+
+    def end_game(self):
+        self.game_over = True
+        self.enemies.clear(self.display, Background().image)
+        self.boosts.clear(self.display, Background().image)
+        self.enemies.empty()
+        self.boosts.empty()
+        gameover = GameOver("GAME OVER")
+        self.over_group.add(gameover)
+
