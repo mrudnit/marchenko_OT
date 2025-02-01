@@ -22,7 +22,7 @@ hud = HUD(display)
 background = Background()
 score = Score()
 game = Game(display, score)
-#groupsf
+#groups
 bg_group = pygame.sprite.Group()
 bg_group.add(background)
 

@@ -114,7 +114,6 @@ class Game:
 
         self.explosions.update()
         self.explosions.draw(self.display)
-
         self.clock.tick(self.FPS)
 
     #game over
@@ -131,6 +130,7 @@ class Game:
         self.boosts.clear(self.display, Background().image)
         self.enemies.empty()
         self.boosts.empty()
-        gameover = GameOver("GAME OVER")
+        gameover = GameOver("GAME OVER", self.score.points)
+        gameover.play_gameover()
         self.over_group.add(gameover)
 

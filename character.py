@@ -30,7 +30,7 @@ class Character(pygame.sprite.Sprite):
         self.image = pygame.image.load(ship_sprites[ship_id - 1])
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        self.sound = pygame.mixer.Sound(pygame.mixer.Sound('assets/laser.mp3'))
+        self.sound = pygame.mixer.Sound('assets/laser.mp3')
         self.sound.set_volume(0.5)
 
     def move(self, keys):

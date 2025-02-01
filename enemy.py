@@ -11,8 +11,8 @@ class Enemy(pygame.sprite.Sprite):
         self.width = width
         self.height = height
         self.image = pygame.image.load(sprite_path).convert_alpha()
-        self.sound_h = pygame.mixer.Sound(pygame.mixer.Sound('assets/hit.mp3'))
-        self.sound_e = pygame.mixer.Sound(pygame.mixer.Sound('assets/explosion.mp3'))
+        self.sound_h = pygame.mixer.Sound('assets/hit.mp3')
+        self.sound_e = pygame.mixer.Sound('assets/explosion.mp3')
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
         self.destroyed = False
