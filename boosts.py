@@ -24,12 +24,16 @@ class Boost(pygame.sprite.Sprite):
             self.kill()
 
     def apply_boost(self, character):
+        now = pygame.time.get_ticks()
         if self.boost_type == "double_fire":
             character.shoot_delay = 150
+            character.double_start = now
         elif self.boost_type == "damage_up":
-            character.power_shoot += 1
+            character.strength += 1
+            character.damage_start = now
         elif self.boost_type == "shield":
             character.invulnerability = 10000
+            character.shield_start = now
         self.kill()
 
     def get_type(self):

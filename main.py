@@ -1,6 +1,5 @@
 import pygame
 
-import character
 from background import Background
 from game import Game
 from hud import HUD

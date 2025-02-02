@@ -26,7 +26,12 @@ class Game:
         self.game_over = False
 
     def set_ship(self, ship_id):
-        self.character = Character(400, 500, 50, 50, 10, ship_id)
+        ship_sprites = [
+            "assets/ship_green.png",
+            "assets/ship_orange.png",
+            "assets/ship_red.png"
+        ]
+        self.character = Character(400, 500, 50, 50, 10, ship_sprites[ship_id - 1])
 
     def spawn_enemies(self):
         enemy_sprites = [
@@ -43,13 +48,15 @@ class Game:
         if random.random() > 0.5:  # 50% шанс врага или метеорита
             sprite = random.choice(enemy_sprites)
             speed = random.randint(3, 6)
+            enemy_type = "ship"
         else:
             sprite = random.choice(meteor_sprites)
             speed = random.randint(2, 5)
+            enemy_type = "meteor"
 
         x = random.randint(0, 750)
         y = random.randint(-200, -50)
-        self.enemies.add(Enemy(x, y, 50, 50, sprite, speed))
+        self.enemies.add(Enemy(x, y, 50, 50, sprite, speed, enemy_type))
 
     def spawn_boost(self):
         boost_sprites = {
@@ -69,10 +76,11 @@ class Game:
 
         # character
         keys = pygame.key.get_pressed()
-        if self.character:
+        if self.character and self.character.is_alive:
             self.character.move(keys)
             if keys[pygame.K_SPACE]:
                 self.character.shoot()
+            self.character.update()
             self.character.update_lasers()
             self.character.draw(self.display)
 
@@ -85,6 +93,8 @@ class Game:
 
         self.enemies.update()
         self.enemies.draw(self.display)
+        for enemy in self.enemies:
+            enemy.lasers.draw(self.display)
 
         #spawn boosts
         if not self.game_over:
@@ -93,18 +103,24 @@ class Game:
         self.boosts.update()
         self.boosts.draw(self.display)
         #collisions
-        collision_group = pygame.sprite.groupcollide(self.character.lasers, self.enemies, True, False)
-        for laser, enemy_list in collision_group.items():
+        collision_enemies = pygame.sprite.groupcollide(self.character.lasers, self.enemies, True, False)
+        for laser, enemy_list in collision_enemies.items():
             for enemy in enemy_list:
-                if enemy.get_laser():
-                    explosion = Explosion(enemy.rect.width, enemy.rect.height, enemy.rect.x, enemy.rect.y,"assets/boom.png")
+                if enemy.get_laser(self.character.strength):
+                    explosion = Explosion(enemy.rect.width, enemy.rect.height, enemy.rect.centerx, enemy.rect.centery,"assets/boom.png")
                     self.explosions.add(explosion)
                     enemy.dead()
                     self.score.update_score(25)
 
-        collision_group2 = pygame.sprite.spritecollideany(self.character, self.enemies)  # возвращает лишь один спрайт с которым произошло столкновения
-        if collision_group2:
+        collision_character1 = pygame.sprite.spritecollideany(self.character, self.enemies)  # возвращает лишь один спрайт с которым произошло столкновения
+        if collision_character1:
             self.character.get_hit()
+
+        for enemy in self.enemies:
+            collision_character2 = pygame.sprite.spritecollideany(self.character, enemy.lasers)
+            if  collision_character2:
+                self.character.get_hit()
+                collision_character2.kill()
 
         boost_collision = pygame.sprite.spritecollideany(self.character, self.boosts)
         if boost_collision:
