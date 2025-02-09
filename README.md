@@ -61,6 +61,10 @@ _Enemy:_
 ```
 class in which the enemie's logic and actions reside
 ```
+_EnemyLaser:_
+```
+class in which settings laser for enemy
+```
 _Boost:_
 ```
 class in which the boost's logic is located, and the boost is drawn out
