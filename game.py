@@ -1,5 +1,6 @@
 import random
 import pygame
+import settings as s
 
 from character import Character
 from enemy import Enemy
@@ -10,13 +11,14 @@ from gameover import GameOver
 
 
 class Game:
-    def __init__(self, display, score):
+    def __init__(self, display, score, hud):
         self.display = display
         self.character = None
         self.clock = pygame.time.Clock()
         self.FPS = 60
         self.spawn_timer = 0
         self.score = score
+        self.hud = hud
         self.enemies = pygame.sprite.Group()
         self.explosions = pygame.sprite.Group()
         self.boosts = pygame.sprite.Group()
@@ -40,9 +42,12 @@ class Game:
             "assets/enemy3.png"
         ]
         meteor_sprites = [
-            "assets/meteor_big.png",
-            "assets/meteor_middle.png",
-            "assets/meteor_small.png"
+            ["assets/meteor_small_1.png", "assets/meteor_small_2.png", "assets/meteor_small_3.png",
+             "assets/meteor_small_4.png"],
+            ["assets/meteor_middle_1.png", "assets/meteor_middle_2.png",
+             "assets/meteor_middle_3.png", "assets/meteor_middle_4.png"],
+            ["assets/meteor_big_1.png", "assets/meteor_big_2.png",
+             "assets/meteor_big_3.png", "assets/meteor_big_4.png"]
         ]
 
         if random.random() > 0.5:  # 50% шанс врага или метеорита
@@ -54,9 +59,14 @@ class Game:
             speed = random.randint(2, 5)
             enemy_type = "meteor"
 
-        x = random.randint(0, 750)
+        max_x = s.WIDTH - 50
+        x = random.randint(0, max_x)
         y = random.randint(-200, -50)
-        self.enemies.add(Enemy(x, y, 50, 50, sprite, speed, enemy_type))
+        # Проверяем, является ли sprite списком
+        if isinstance(sprite, list):
+            self.enemies.add(Enemy(x, y, 50, 50, sprite, speed, enemy_type))
+        else:
+            self.enemies.add(Enemy(x, y, 50, 50, [sprite], speed, enemy_type))
 
     def spawn_boost(self):
         boost_sprites = {
@@ -107,12 +117,26 @@ class Game:
         for laser, enemy_list in collision_enemies.items():
             for enemy in enemy_list:
                 if enemy.get_laser(self.character.strength):
-                    explosion = Explosion(enemy.rect.width, enemy.rect.height, enemy.rect.centerx, enemy.rect.centery,"assets/boom.png")
+                    explosion_sprites = [
+                        "assets/boom1.png",
+                        "assets/boom2.png",
+                        "assets/boom3.png",
+                        "assets/boom4.png",
+                        "assets/boom5.png",
+                        "assets/boom6.png",
+                        "assets/boom7.png",
+                        "assets/boom8.png",
+                        "assets/boom9.png",
+                        "assets/boom10.png",
+                        "assets/boom11.png",
+                        "assets/boom12.png"
+                    ]
+                    explosion = Explosion(enemy.rect.width, enemy.rect.height, enemy.rect.centerx, enemy.rect.centery, explosion_sprites)
                     self.explosions.add(explosion)
                     enemy.dead()
-                    self.score.update_score(25)
+                    self.score.update_score()
 
-        collision_character1 = pygame.sprite.spritecollideany(self.character, self.enemies)  # возвращает лишь один спрайт с которым произошло столкновения
+        collision_character1 = pygame.sprite.spritecollideany(self.character, self.enemies)
         if collision_character1:
             self.character.get_hit()
 
@@ -126,20 +150,15 @@ class Game:
         if boost_collision:
             boost_collision.apply_boost(self.character)
 
-        self.check_game_over()
-
         self.explosions.update()
         self.explosions.draw(self.display)
         self.clock.tick(self.FPS)
 
-    #game over
-    def check_game_over(self):
-        if self.character and not self.character.is_alive and not self.game_over:
-            self.end_game()
-
         if self.game_over:
+            self.over_group.update()
             self.over_group.draw(self.display)
 
+    #game over
     def end_game(self):
         self.game_over = True
         self.enemies.clear(self.display, Background().image)
@@ -149,4 +168,3 @@ class Game:
         gameover = GameOver("GAME OVER", self.score.points)
         gameover.play_gameover()
         self.over_group.add(gameover)
-

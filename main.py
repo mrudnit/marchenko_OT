@@ -20,7 +20,7 @@ pygame.mixer.music.play(-1)
 hud = HUD(display)
 background = Background()
 score = Score()
-game = Game(display, score)
+game = Game(display, score, hud)
 #groups
 bg_group = pygame.sprite.Group()
 bg_group.add(background)
@@ -65,6 +65,22 @@ while run:
         game.run()
         score.update()
         display.blit(score.image, score.rect)
+
+        if game.game_over:
+            game.over_group.update()
+            game.over_group.draw(display)
+            action = hud.draw_gameover()
+            if action == "back":
+                pygame.mixer.music.stop()
+                game.over_group.empty()
+                game_state = STATE_MAIN
+                game = Game(display, score, hud)
+                score.reset()
+                selected_ship = None
+                pygame.mixer.music.play(-1)
+
+        if game.character and not game.character.is_alive and not game.game_over:
+            game.end_game()
 
     pygame.display.update()
 

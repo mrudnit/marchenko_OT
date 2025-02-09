@@ -13,6 +13,7 @@ class HUD:
         self.play_button = button.Button(265, 180, play_img, 0.8)
         self.menu_button = button.Button(270, 280, menu_img, 0.8)
         self.back_button = button.Button(20, 20, back_img, 0.5)
+        self.gameover_button = button.Button(20, 20, back_img, 0.5)
 
         self.ship_buttons = [
             pygame.Rect(150, 400, 100, 50),
@@ -83,5 +84,10 @@ class HUD:
 
         if self.back_button.draw(self.display):
             return "back"
-
         return None
+
+    def draw_gameover(self):
+        if self.gameover_button.draw(self.display):
+            return "back"
+        return None
+
