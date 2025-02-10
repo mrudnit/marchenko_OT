@@ -26,6 +26,15 @@ class Character(pygame.sprite.Sprite):
         self.shoot_delay = 300
         self.is_alive = True
         self.lasers = pygame.sprite.Group()
+        self.shooting = False
+        self.shooting_frame = 0
+        self.shooting_images = []
+        for i in range(1, 6):
+            img = pygame.image.load(f"assets/shoot{i}.png").convert_alpha()
+            img = pygame.transform.scale(img, (width // 2, height // 2))
+            self.shooting_images.append(img)
+        self.shooting_duration = 50
+        self.shooting_timer = 0
         self.image = pygame.image.load(sprite_ship)
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
@@ -50,11 +59,19 @@ class Character(pygame.sprite.Sprite):
                 self.sound.play()
                 self.lasers.add(laser)
                 self.last_shot = now
+                self.shooting = True
+                self.shooting_frame = 0
+                self.shooting_timer = pygame.time.get_ticks()
 
     def draw(self, display):
         display.blit(self.image, self.rect.topleft)
-        self.lasers.draw(display)
         self.draw_health_bar(display)
+        if self.shooting:
+            img = self.shooting_images[self.shooting_frame]
+            shot_x = self.rect.centerx - img.get_width() // 2
+            shot_y = self.rect.y - 22
+            display.blit(img, (shot_x, shot_y))
+        self.lasers.draw(display)
 
     def update_lasers(self):
         self.lasers.update()
@@ -69,6 +86,14 @@ class Character(pygame.sprite.Sprite):
         if not self.active_boost("shield") and self.shield_start != 0:
             self.off_boost("shield")
             self.shield_start = 0
+
+        if self.shooting:
+            now = pygame.time.get_ticks()
+            if now - self.shooting_timer > self.shooting_duration:
+                self.shooting_timer = now
+                self.shooting_frame += 1
+                if self.shooting_frame >= len(self.shooting_images):
+                    self.shooting = False
 
     def draw_health_bar(self, display):
         health_height = 5
