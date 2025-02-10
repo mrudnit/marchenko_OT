@@ -13,7 +13,7 @@ pygame.font.init()
 display = pygame.display.set_mode(SIZE)
 pygame.display.set_caption(WINDOW_TITLE)
 #background music
-pygame.mixer.music.load(M_PATH)
+pygame.mixer.music.load("assets/background.mp3")
 pygame.mixer.music.set_volume(M_VOLUME)
 pygame.mixer.music.play(-1)
 #classes

@@ -18,7 +18,7 @@ class Enemy(pygame.sprite.Sprite):
         self.sound_e = pygame.mixer.Sound('assets/explosion.mp3')
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-        self.animation_speed = 15
+        self.animation_speed = 35
         self.frame_count = 0
         self.current_frame = 0
         self.destroyed = False

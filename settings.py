@@ -13,5 +13,4 @@ STATE_SHIP = "Ship"
 game_state = STATE_MAIN
 #more
 BG_color = (0, 0, 0)
-M_PATH = os.path.join("assets", "background_m.mp3")
 M_VOLUME = 0.4
